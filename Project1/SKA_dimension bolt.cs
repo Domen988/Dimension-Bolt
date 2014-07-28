@@ -7,7 +7,7 @@ using Tekla.Structures.Geometry3d;
 using T3D = Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
-using Tekla.Structures.Solid;                                                                                             /////////
+using Tekla.Structures.Solid;                                                                                             //////////
 /////////
 namespace Tekla.Technology.Akit.UserScript                                                                                /////////
 {                                                                                                                         /////////
