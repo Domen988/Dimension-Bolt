@@ -132,7 +132,7 @@ namespace Tekla.Technology.Akit.UserScript                                      
         }
 
         private string PickBoltGroup = "Pick bolt group to dimension.";
-        private string PickPart = "Pick part to dimension bolts in relation to.";
+        private string PickPart = "Pick part or grid to dimension bolts in relation to.";
 
         public BoltDimension()
         {
@@ -176,9 +176,9 @@ namespace Tekla.Technology.Akit.UserScript                                      
             while (partFlag)
             {
                 picker.PickObject(PickPart, out pickedObject2, out viewBase2);
-                if (pickedObject2 == null || viewBase2 == null || !(pickedObject2 is Tekla.Structures.Drawing.Part))
+                if (pickedObject2 == null || viewBase2 == null || (!(pickedObject2 is Tekla.Structures.Drawing.Part) && !(pickedObject2 is Tekla.Structures.Drawing.Grid)))
                 {
-                    PickPart = "No drawing part found for 2nd picked object. Pick again.";
+                    PickPart = "No drawing part or grid found for 2nd picked object. Pick again.";
                 }
                 else
                     partFlag = false;
