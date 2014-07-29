@@ -184,9 +184,20 @@ namespace Tekla.Technology.Akit.UserScript                                      
                     partFlag = false;
             }
 
-            var drawingPart = pickedObject2 as Tekla.Structures.Drawing.Part;
-            drawingPart.Select();
-            var modelPart = new Model().SelectModelObject(drawingPart.ModelIdentifier);
+            if (pickedObject2 is Tekla.Structures.Drawing.Part)
+            {
+                var drawingPart = pickedObject2 as Tekla.Structures.Drawing.Part;
+                drawingPart.Select();
+                var modelPart = new Model().SelectModelObject(drawingPart.ModelIdentifier);
+            }
+
+            else if (pickedObject2 is Tekla.Structures.Drawing.Grid)
+            {
+                var drawingPart = pickedObject2 as Tekla.Structures.Drawing.Part;
+                drawingPart.Select();
+                var modelPart = new Model().SelectModelObject(drawingPart.ModelIdentifier);
+            }
+
 
             //Get view from picked objects
             var tView = pickedObject1.GetView() as Tekla.Structures.Drawing.View;
