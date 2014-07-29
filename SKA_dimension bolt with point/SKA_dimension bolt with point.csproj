@@ -55,9 +55,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\TeklaStructuresLearning\19.1\nt\bin\plugins\Tekla.Structures.Drawing.dll</HintPath>
     </Reference>
-    <Reference Include="Tekla.Structures.Geometry3d.Compatibility">
-      <HintPath>C:\Program Files (x86)\TeklaStructuresLearning\19.1\nt\bin\plugins\Tekla.Structures.Geometry3d.Compatibility.dll</HintPath>
-    </Reference>
     <Reference Include="Tekla.Structures.Model, Version=19.1.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\TeklaStructuresLearning\19.1\nt\bin\plugins\Tekla.Structures.Model.dll</HintPath>

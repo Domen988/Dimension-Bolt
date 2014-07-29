@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -30,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -39,9 +41,6 @@
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>False</EmbedInteropTypes>
       <HintPath>C:\Program Files (x86)\TeklaStructuresLearning\19.1\nt\bin\plugins\Akit5.dll</HintPath>
-    </Reference>
-    <Reference Include="ShapeDetection">
-      <HintPath>C:\Program Files (x86)\TeklaStructuresLearning\19.1\nt\bin\plugins\Tekla\Model\ObjectConverter\ShapeDetection.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -56,7 +55,7 @@
       <HintPath>C:\Program Files (x86)\TeklaStructuresLearning\19.1\nt\bin\plugins\Tekla.Structures.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="Tekla.Structures.Geometry3d.Compatibility">
-      <HintPath>C:\Program Files (x86)\TeklaStructuresLearning\19.1\nt\bin\plugins\Tekla.Structures.Geometry3d.Compatibility.dll</HintPath>
+      <HintPath>..\..\..\..\..\TeklaStructures\19.0\nt\bin\plugins\Tekla.Structures.Geometry3d.Compatibility.dll</HintPath>
     </Reference>
     <Reference Include="Tekla.Structures.Model, Version=19.1.0.0, Culture=neutral, PublicKeyToken=2f04dbe497b71114, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
