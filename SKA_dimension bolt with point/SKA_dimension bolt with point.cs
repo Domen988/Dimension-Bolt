@@ -3,7 +3,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Windows.Forms;
 using Tekla.Structures.Drawing;
-using Tekla.Structures.Geometry3d;
+using T3D = Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
 using Tekla.Technology.Akit.UserScript;
 using Tekla.Structures;
@@ -148,14 +148,14 @@ namespace Tekla.Technology.Akit.UserScript
                 // ------------------------------------------------------- //
 
                 //var dimSetAttributes = new Tekla.Structures.Drawing.attributes("standard");
-                var dimVector = new Vector(0, 1, 0);
-                var perpVector = dimVector.Cross(new Vector(0, 0, 1));
+                var dimVector = new T3D.Vector(0, 1, 0);
+                var perpVector = dimVector.Cross(new T3D.Vector(0, 0, 1));
 
                 //Add dimensions
                 var newDimSet = new Tekla.Structures.Drawing.StraightDimensionSetHandler();
                 newDimSet.CreateDimensionSet(tView, CovertArrayListToPointList(dimensionPoints), dimVector, distancePast);
                 newDimSet.CreateDimensionSet(tView, CovertArrayListToPointList(dimensionPoints), perpVector, distancePast);
-
+               
             }
             catch (Exception ex)
             {
@@ -196,13 +196,13 @@ namespace Tekla.Technology.Akit.UserScript
                 // ------------------------------------------------------- //
 
                 //Set dimension direction
-                Vector dimVector;
+                T3D.Vector dimVector;
                 var centerAxis = new Tekla.Structures.Geometry3d.Line(tBeam.StartPoint, tBeam.EndPoint);
-                if (VectorsParallel(centerAxis.Direction, new Vector(0, 0, 1)))
-                    dimVector = new Vector(0, 1, 0);
+                if (VectorsParallel(centerAxis.Direction, new T3D.Vector(0, 0, 1)))
+                    dimVector = new T3D.Vector(0, 1, 0);
                 else
-                    dimVector = new Vector(centerAxis.Direction);
-                var perpVector = dimVector.Cross(new Vector(0, 0, 1));
+                    dimVector = new T3D.Vector(centerAxis.Direction);
+                var perpVector = dimVector.Cross(new T3D.Vector(0, 0, 1));
 
                 //Add dimensions
                 var newDimSet = new Tekla.Structures.Drawing.StraightDimensionSetHandler();
@@ -238,13 +238,13 @@ namespace Tekla.Technology.Akit.UserScript
 
             return Tekla.Structures.Geometry3d.Parallel.VectorToVector(v1, v2);
         }
-        private static Vector VectorRound(Tekla.Structures.Geometry3d.Vector tVector1)
+        private static T3D.Vector VectorRound(Tekla.Structures.Geometry3d.Vector tVector1)
         {
             const int decPlace = 5;
             var x = Math.Round(tVector1.X, decPlace);
             var y = Math.Round(tVector1.Y, decPlace);
             var z = Math.Round(tVector1.Z, decPlace);
-            return new Vector(x, y, z);
+            return new T3D.Vector(x, y, z);
         }
         #endregion
     }

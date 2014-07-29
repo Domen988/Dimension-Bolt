@@ -132,7 +132,7 @@ namespace Tekla.Technology.Akit.UserScript                                      
         }
 
         private string PickBoltGroup = "Pick bolt group to dimension.";
-        private string PickPart = "Pick part or grid to dimension bolts in relation to.";
+        private string PickPart = "Pick part or grid line to dimension bolts in relation to.";
 
         public BoltDimension()
         {
@@ -176,28 +176,13 @@ namespace Tekla.Technology.Akit.UserScript                                      
             while (partFlag)
             {
                 picker.PickObject(PickPart, out pickedObject2, out viewBase2);
-                if (pickedObject2 == null || viewBase2 == null || (!(pickedObject2 is Tekla.Structures.Drawing.Part) && !(pickedObject2 is Tekla.Structures.Drawing.Grid)))
+                if (pickedObject2 == null || viewBase2 == null || (!(pickedObject2 is Tekla.Structures.Drawing.Part) && !(pickedObject2 is Tekla.Structures.Drawing.GridLine)))
                 {
-                    PickPart = "No drawing part or grid found for 2nd picked object. Pick again.";
+                    PickPart = "No drawing part or grid line found for 2nd picked object. Pick again.";
                 }
                 else
                     partFlag = false;
             }
-
-            if (pickedObject2 is Tekla.Structures.Drawing.Part)
-            {
-                var drawingPart = pickedObject2 as Tekla.Structures.Drawing.Part;
-                drawingPart.Select();
-                var modelPart = new Model().SelectModelObject(drawingPart.ModelIdentifier);
-            }
-
-            else if (pickedObject2 is Tekla.Structures.Drawing.Grid)
-            {
-                var drawingPart = pickedObject2 as Tekla.Structures.Drawing.Part;
-                drawingPart.Select();
-                var modelPart = new Model().SelectModelObject(drawingPart.ModelIdentifier);
-            }
-
 
             //Get view from picked objects
             var tView = pickedObject1.GetView() as Tekla.Structures.Drawing.View;
@@ -208,29 +193,58 @@ namespace Tekla.Technology.Akit.UserScript                                      
             }
             tView.Select();
 
-            //Verify model part and bolt are not null
-            if (modelPart == null || modelBolt == null)
+            var drawingPart = pickedObject2 as Tekla.Structures.Drawing.Part;
+            var drawingGrid = pickedObject2 as Tekla.Structures.Drawing.GridLine;
+            if (pickedObject2 is Tekla.Structures.Drawing.Part)
             {
-                MessageBox.Show("Unable to get model object from drawing using Id's.");
-                return;
+                drawingPart = pickedObject2 as Tekla.Structures.Drawing.Part;
+                drawingPart.Select();
+                var modelPart = new Model().SelectModelObject(drawingPart.ModelIdentifier);
+                //Verify model part and bolt are not null
+                if (modelPart == null || modelBolt == null)
+                {
+                    MessageBox.Show("Unable to get model object from drawing using Id's.");
+                    return;
+                }
+                //Call specific methods for beams vs. contour plates
+                if (modelPart is Tekla.Structures.Model.Beam)
+                {
+                    var tBeam = (Tekla.Structures.Model.Beam)modelPart;                                                   //
+                    //string typeTest = "";                                                                               //
+                    //string profile_type = "PROFILE_TYPE";                                                               // profile type test
+                    //modelPart.GetReportProperty(profile_type, ref typeTest);                                            //
+                    //MessageBox.Show(typeTest.ToString());                                                               //
+                    var tBoltGoup = (Tekla.Structures.Model.BoltGroup)modelBolt;
+                    CreateBoltDimensionToBeam(tView, tBeam, tBoltGoup);
+                }
+                else if (modelPart is Tekla.Structures.Model.ContourPlate)
+                {
+                    var tContourPlate = (Tekla.Structures.Model.ContourPlate)modelPart;
+                    var tBoltGoup = (Tekla.Structures.Model.BoltGroup)modelBolt;
+                    CreateBoltDimensionToPlate(tView, tContourPlate, tBoltGoup);
+                }
             }
 
-            //Call specific methods for beams vs. contour plates
-            if (modelPart is Tekla.Structures.Model.Beam)
+            else if (pickedObject2 is Tekla.Structures.Drawing.GridLine)
             {
-                var tBeam = (Tekla.Structures.Model.Beam)modelPart;                                                   //
-                //string typeTest = "";                                                                               //
-                //string profile_type = "PROFILE_TYPE";                                                               // profile type test
-                //modelPart.GetReportProperty(profile_type, ref typeTest);                                            //
-                //MessageBox.Show(typeTest.ToString());                                                               //
-                var tBoltGoup = (Tekla.Structures.Model.BoltGroup)modelBolt;
-                CreateBoltDimensionToBeam(tView, tBeam, tBoltGoup);
-            }
-            else if (modelPart is Tekla.Structures.Model.ContourPlate)
-            {
-                var tContourPlate = (Tekla.Structures.Model.ContourPlate)modelPart;
-                var tBoltGoup = (Tekla.Structures.Model.BoltGroup)modelBolt;
-                CreateBoltDimensionToPlate(tView, tContourPlate, tBoltGoup);
+                drawingGrid = pickedObject2 as Tekla.Structures.Drawing.GridLine;
+                drawingGrid.Select();
+                var modelGrid = new Model().SelectModelObject(drawingGrid.ModelIdentifier);
+                //Verify model part and bolt are not null
+                if (modelGrid == null || modelBolt == null)
+                {
+                    MessageBox.Show("Unable to get model object from drawing using Id's.");
+                    return;
+                }
+                else if (modelGrid is Tekla.Structures.Model.Grid)
+                {
+                    MessageBox.Show("ok");
+                    
+                }
+                else
+                {
+                    MessageBox.Show("ni ok");
+                }
             }
         }
 
