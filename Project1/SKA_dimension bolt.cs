@@ -7,7 +7,8 @@ using Tekla.Structures.Geometry3d;
 using T3D = Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.Operations;
-using Tekla.Structures.Solid;                                                                                             //////////
+using Tekla.Structures.Solid;             
+//////////
 /////////
 namespace Tekla.Technology.Akit.UserScript                                                                                /////////
 {                                                                                                                         /////////
@@ -18,6 +19,7 @@ namespace Tekla.Technology.Akit.UserScript                                      
             try                                                                                                           /////////
             {                                                                                                             /////////
                 new BoltDimension();                                                                                      /////////
+                //new Example1();
             }                                                                                                             /////////
             catch (Exception)                                                                                             /////////
             { }                                                                                                           /////////
@@ -27,12 +29,37 @@ namespace Tekla.Technology.Akit.UserScript                                      
             try                                                                                                           /////////
             {                                                                                                             /////////
                 new BoltDimension();                                                                                      /////////
+                //new Example1();
             }                                                                                                             /////////
             catch (Exception)                                                                                             /////////
             { }                                                                                                           /////////
         }                                                                                                                 /////////
     }                                                                                                                     /////////
     /////////
+
+    class Example1
+    {
+        public Example1()
+        {
+            Drawing MyDrawing = new GADrawing();
+            Tekla.Structures.Drawing.View curview = new Tekla.Structures.Drawing.View(MyDrawing.GetSheet(), new CoordinateSystem(), new CoordinateSystem(),
+                new AABB(new Point(), new Point(30000, 30000, 10000)));
+            Tekla.Structures.Drawing.Grid curGrid;
+
+            DrawingObjectEnumerator allObjects = curview.GetAllObjects();
+            while (allObjects.MoveNext())
+            {
+                if (allObjects.Current is Tekla.Structures.Drawing.Grid)
+                {
+                    curGrid = allObjects.Current as Tekla.Structures.Drawing.Grid;
+                    curGrid.Attributes.DrawTextAtTopOfGrid = true;
+                    curGrid.Attributes.Font.Color = DrawingColors.Red;
+                    curGrid.Modify(); /* Apply changes */
+                }
+            }
+        }
+    }
+
     class BoltDimension                                                                                                   /////////
     {                                                                                                                     /////////
         /// <summary>                                                                                                     /////////
@@ -194,7 +221,7 @@ namespace Tekla.Technology.Akit.UserScript                                      
             tView.Select();
 
             var drawingPart = pickedObject2 as Tekla.Structures.Drawing.Part;
-            var drawingGrid = pickedObject2 as Tekla.Structures.Drawing.GridLine;
+            var drawingGridline = pickedObject2 as Tekla.Structures.Drawing.GridLine;
             if (pickedObject2 is Tekla.Structures.Drawing.Part)
             {
                 drawingPart = pickedObject2 as Tekla.Structures.Drawing.Part;
@@ -227,16 +254,16 @@ namespace Tekla.Technology.Akit.UserScript                                      
 
             else if (pickedObject2 is Tekla.Structures.Drawing.GridLine)
             {
-                drawingGrid = pickedObject2 as Tekla.Structures.Drawing.GridLine;
-                drawingGrid.Select();
-                var modelGrid = new Model().SelectModelObject(drawingGrid.ModelIdentifier);
+                drawingGridline = pickedObject2 as Tekla.Structures.Drawing.GridLine;
+                drawingGridline.Select();
+                var modelGridline = new Model().SelectModelObject(drawingGridline.ModelIdentifier);
                 //Verify model part and bolt are not null
-                if (modelGrid == null || modelBolt == null)
+                if (modelGridline == null || modelBolt == null)
                 {
                     MessageBox.Show("Unable to get model object from drawing using Id's.");
                     return;
                 }
-                else if (modelGrid is Tekla.Structures.Model.Grid)
+                else if (modelGridline is Tekla.Structures.Model.Grid)
                 {
                     MessageBox.Show("ok");
                     
