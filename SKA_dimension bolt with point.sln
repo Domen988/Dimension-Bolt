@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SKA_dimension bolt with poi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SKA_dimension bolt", "Project1\SKA_dimension bolt.csproj", "{297B71FA-7E39-48E6-8536-4DD364A33492}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testing", "testing\testing.csproj", "{6386FBCF-7642-4F1A-8748-DBB58CF6572D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{297B71FA-7E39-48E6-8536-4DD364A33492}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{297B71FA-7E39-48E6-8536-4DD364A33492}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{297B71FA-7E39-48E6-8536-4DD364A33492}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6386FBCF-7642-4F1A-8748-DBB58CF6572D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6386FBCF-7642-4F1A-8748-DBB58CF6572D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6386FBCF-7642-4F1A-8748-DBB58CF6572D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6386FBCF-7642-4F1A-8748-DBB58CF6572D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
