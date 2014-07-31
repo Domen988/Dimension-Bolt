@@ -38,9 +38,8 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Akit5, Version=5.4.0.0, Culture=neutral, PublicKeyToken=a70cba4ef557ee03, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\TeklaStructures\19.0\nt\bin\Akit5.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
-      <HintPath>..\..\..\..\..\TeklaStructures\19.0\nt\bin\plugins\Akit5.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

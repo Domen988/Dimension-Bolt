@@ -37,28 +37,6 @@ namespace Tekla.Technology.Akit.UserScript                                      
     }                                                                                                                     /////////
     /////////
 
-    class Example1
-    {
-        public Example1()
-        {
-            Drawing MyDrawing = new GADrawing();
-            Tekla.Structures.Drawing.View curview = new Tekla.Structures.Drawing.View(MyDrawing.GetSheet(), new CoordinateSystem(), new CoordinateSystem(),
-                new AABB(new Point(), new Point(30000, 30000, 10000)));
-            Tekla.Structures.Drawing.Grid curGrid;
-
-            DrawingObjectEnumerator allObjects = curview.GetAllObjects();
-            while (allObjects.MoveNext())
-            {
-                if (allObjects.Current is Tekla.Structures.Drawing.Grid)
-                {
-                    curGrid = allObjects.Current as Tekla.Structures.Drawing.Grid;
-                    curGrid.Attributes.DrawTextAtTopOfGrid = true;
-                    curGrid.Attributes.Font.Color = DrawingColors.Red;
-                    curGrid.Modify(); /* Apply changes */
-                }
-            }
-        }
-    }
 
     class BoltDimension                                                                                                   /////////
     {                                                                                                                     /////////
