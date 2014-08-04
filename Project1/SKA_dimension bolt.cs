@@ -177,7 +177,6 @@ namespace Tekla.Technology.Akit.UserScript                                      
             var modelBolt = new Model().SelectModelObject(drawingBolt.ModelIdentifier);
 
             //Get model part from picked object
-
             bool partFlag = true;
             while (partFlag)
             {
@@ -244,18 +243,6 @@ namespace Tekla.Technology.Akit.UserScript                                      
                 }
                 var tBoltGroup = (Tekla.Structures.Model.BoltGroup)modelBolt;
                 CreateBoltDimensiontToGrid(tView, tBoltGroup);
-
-                    /*
-                else if (modelGridline is Tekla.Structures.Model.Grid)
-                {
-                    MessageBox.Show("ok");
-                    
-                }
-                else
-                {
-                    MessageBox.Show("ni ok");
-                }
-                     */
             }
         }
         private static void CreateBoltDimensiontToGrid(Tekla.Structures.Drawing.View tView, Tekla.Structures.Model.BoltGroup tBoltGroup)
@@ -274,33 +261,51 @@ namespace Tekla.Technology.Akit.UserScript                                      
                 Tekla.Structures.Drawing.Grid curGrid;
                 GridLine curGridLine;
                 DrawingObjectEnumerator allGridLines;
-               // DrawingObjectEnumerator allGridLines = curGrid.GetObjects();
-                while (allObjects.MoveNext()) /* Iterate through all the grid lines of the grid */
-                {
-                    if (allObjects.Current is Tekla.Structures.Drawing.Grid)
-                    {
+                var dimensionXGridPoints = new ArrayList();
+                var dimensionYGridPoints = new ArrayList();
+                var tolerance = 0.05;
 
+                while (allObjects.MoveNext()) /* Iterate through all the objects in the view */
+                {
+                    if (allObjects.Current is Tekla.Structures.Drawing.Grid)  /* check if object is grid */
+                    {
                         curGrid = allObjects.Current as Tekla.Structures.Drawing.Grid;
                         allGridLines = curGrid.GetObjects();
+                        var point1 = new Point();
+                        var point2 = new Point();
+                        var pointForDim = new Point();
                         while (allGridLines.MoveNext())
                         {
-                            if (allGridLines.Current is TDWG.GridLine)
+                            if (allGridLines.Current is TDWG.GridLine)  /* Iterate through all the grid lines of the grid */
                             {
                                 curGridLine = allGridLines.Current as TDWG.GridLine;
-                                continue;
+                                point1 = curGridLine.EndLabel.GridPoint;
+                                point2 = curGridLine.StartLabel.GridPoint;
+                                
+                                if (point1.X - point2.X < tolerance)      // decide which points to take for which dimension
+                                {
+                                    pointForDim.X = point1.X;
+                                }
+                                if (point1.Y - point2.Y < tolerance)
+                                {
+                                    pointForDim.Y = point1.Y;
+                                }
+
                             }
                         }
-                        curGrid.Attributes.DrawTextAtTopOfGrid = true;
-                        curGrid.Attributes.Font.Color = DrawingColors.Blue;
-                      
-                       // // The following code moves the grid labels off the grid lines by 200.
-                       // curGridLine.StartLabel.GridLabelPoint.Y = curGridLine.StartLabel.GridPoint.Y + 200;
-                       // curGridLine.EndLabel.GridLabelPoint.Y = curGridLine.EndLabel.GridPoint.Y + 200;
-                       //
-                        curGrid.Modify(); /* Apply changes */
+                        if (pointForDim.X == 0.0)
+                        {
+                            pointForDim.X = (point1.X + point2.X) / 2;
+                        }
+                        if (pointForDim.Y == 0.0)
+                        {
+                            pointForDim.Y = (point1.Y + point2.Y) / 2;
+                        }
+                        dimensionXGridPoints.Add(pointForDim);
+                        dimensionYGridPoints.Add(pointForDim);
                     }
                 }
-                /*
+                
                 tBoltGroup.Select();
                 tView.Select();
 
@@ -311,7 +316,6 @@ namespace Tekla.Technology.Akit.UserScript                                      
                 //Add bolt positions
                 var dimensionPoints = new ArrayList();
                 dimensionPoints.AddRange(tBoltGroup.BoltPositions);
-                Solid tSolid = tPlate.GetSolid();
 
                 //Create two new dimension lists
                 ArrayList dimPointsX = new ArrayList();
@@ -319,49 +323,21 @@ namespace Tekla.Technology.Akit.UserScript                                      
                 dimPointsX.AddRange(dimensionPoints);
                 dimPointsY.AddRange(dimensionPoints);
 
-                Point maxPoint = tSolid.MaximumPoint;
-                Point minPoint = tSolid.MinimumPoint;
-
-                //Add solid Max end dimensions
-                if (tView.RestrictionBox.IsInside(transDisplayToView.Transform(tSolid.MaximumPoint)))
-                {
-                    //X direction
-                    ArrayList intersectXList =
-                        tSolid.Intersect(new LineSegment(maxPoint, new Point(maxPoint.X, maxPoint.Y + 100, maxPoint.Z)));
-                    if (intersectXList.Count > 0)
-                        dimPointsX.Add(intersectXList[0] as Point);
-
-                    //Y direction
-                    ArrayList intersectYList =
-                        tSolid.Intersect(new LineSegment(maxPoint, new Point(maxPoint.X + 100, maxPoint.Y, maxPoint.Z)));
-                    if (intersectYList.Count > 0)
-                        dimPointsY.Add(intersectYList[0] as Point);
-                }
-
-                //Add solid Min end dimensions
-                if (tView.RestrictionBox.IsInside(transDisplayToView.Transform(tSolid.MinimumPoint)))
-                {
-                    //X direction
-                    ArrayList intersectXList =
-                        tSolid.Intersect(new LineSegment(minPoint, new Point(minPoint.X, minPoint.Y + 100, minPoint.Z)));
-                    if (intersectXList.Count > 0)
-                        dimPointsX.Add(intersectXList[0] as Point);
-
-                    //Y direction
-                    ArrayList intersectYList =
-                        tSolid.Intersect(new LineSegment(minPoint, new Point(minPoint.X + 100, minPoint.Y, minPoint.Z)));
-                    if (intersectYList.Count > 0)
-                        dimPointsY.Add(intersectYList[0] as Point);//xxx
-                }
+                dimPointsX.AddRange(dimensionXGridPoints);
+                dimPointsY.AddRange(dimensionYGridPoints);
 
                 //Set direction vectors
                 Vector dimVector = new Vector(0, 1, 0);
                 Vector perpVector = dimVector.Cross(new Vector(0, 0, 1));
 
                 StraightDimensionSetHandler newDimSet = new Tekla.Structures.Drawing.StraightDimensionSetHandler();
-                newDimSet.CreateDimensionSet(tView, ConvertArrayListToPointList(dimPointsX), dimVector, distancePast);
-                newDimSet.CreateDimensionSet(tView, ConvertArrayListToPointList(dimPointsY), perpVector, distancePast);
-                */
+                TDWG.StraightDimensionSet.StraightDimensionSetAttributes sdsa = new TDWG.StraightDimensionSet.StraightDimensionSetAttributes((TDWG.ModelObject)null);
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                sdsa.DimensionType = DimensionSetBaseAttributes.DimensionTypes.Relative;                                            //////////////////////////////////  Dimensioning to grid lines dimension type /////////////////////////////////////////////////////
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                newDimSet.CreateDimensionSet(tView, ConvertArrayListToPointList(dimPointsX), dimVector, distancePast, sdsa);
+                newDimSet.CreateDimensionSet(tView, ConvertArrayListToPointList(dimPointsY), perpVector, distancePast, sdsa);
+                
             }
             catch (Exception ex)
             {
