@@ -3,6 +3,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Windows.Forms;
 using Tekla.Structures.Drawing;
+using TDWG = Tekla.Structures.Drawing;
 using Tekla.Structures.Geometry3d;
 using T3D = Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
@@ -35,30 +36,8 @@ namespace Tekla.Technology.Akit.UserScript                                      
             { }                                                                                                           /////////
         }                                                                                                                 /////////
     }                                                                                                                     /////////
-    /////////
+                                                                                                                          /////////
 
-    class Example1
-    {
-        public Example1()
-        {
-            Drawing MyDrawing = new GADrawing();
-            Tekla.Structures.Drawing.View curview = new Tekla.Structures.Drawing.View(MyDrawing.GetSheet(), new CoordinateSystem(), new CoordinateSystem(),
-                new AABB(new Point(), new Point(30000, 30000, 10000)));
-            Tekla.Structures.Drawing.Grid curGrid;
-
-            DrawingObjectEnumerator allObjects = curview.GetAllObjects();
-            while (allObjects.MoveNext())
-            {
-                if (allObjects.Current is Tekla.Structures.Drawing.Grid)
-                {
-                    curGrid = allObjects.Current as Tekla.Structures.Drawing.Grid;
-                    curGrid.Attributes.DrawTextAtTopOfGrid = true;
-                    curGrid.Attributes.Font.Color = DrawingColors.Red;
-                    curGrid.Modify(); /* Apply changes */
-                }
-            }
-        }
-    }
 
     class BoltDimension                                                                                                   /////////
     {                                                                                                                     /////////
@@ -198,7 +177,6 @@ namespace Tekla.Technology.Akit.UserScript                                      
             var modelBolt = new Model().SelectModelObject(drawingBolt.ModelIdentifier);
 
             //Get model part from picked object
-
             bool partFlag = true;
             while (partFlag)
             {
@@ -241,8 +219,8 @@ namespace Tekla.Technology.Akit.UserScript                                      
                     //string profile_type = "PROFILE_TYPE";                                                               // profile type test
                     //modelPart.GetReportProperty(profile_type, ref typeTest);                                            //
                     //MessageBox.Show(typeTest.ToString());                                                               //
-                    var tBoltGoup = (Tekla.Structures.Model.BoltGroup)modelBolt;
-                    CreateBoltDimensionToBeam(tView, tBeam, tBoltGoup);
+                    var tBoltGroup = (Tekla.Structures.Model.BoltGroup)modelBolt;
+                    CreateBoltDimensionToBeam(tView, tBeam, tBoltGroup);
                 }
                 else if (modelPart is Tekla.Structures.Model.ContourPlate)
                 {
@@ -263,18 +241,114 @@ namespace Tekla.Technology.Akit.UserScript                                      
                     MessageBox.Show("Unable to get model object from drawing using Id's.");
                     return;
                 }
-                else if (modelGridline is Tekla.Structures.Model.Grid)
-                {
-                    MessageBox.Show("ok");
-                    
-                }
-                else
-                {
-                    MessageBox.Show("ni ok");
-                }
+                var tBoltGroup = (Tekla.Structures.Model.BoltGroup)modelBolt;
+                CreateBoltDimensiontToGrid(tView, tBoltGroup);
             }
         }
+        private static void CreateBoltDimensiontToGrid(Tekla.Structures.Drawing.View tView, Tekla.Structures.Model.BoltGroup tBoltGroup)
+        {
+            const double distancePast = 200.0;
+            var originalPlane = new Model().GetWorkPlaneHandler().GetCurrentTransformationPlane();
+            try
+            {
+                //Clear workplane to new blank global
+                new Model().GetWorkPlaneHandler().SetCurrentTransformationPlane(new TransformationPlane());
 
+                //Set model everything to the view
+                new Model().GetWorkPlaneHandler().SetCurrentTransformationPlane(new TransformationPlane(tView.DisplayCoordinateSystem));
+
+                DrawingObjectEnumerator allObjects = tView.GetAllObjects();
+                Tekla.Structures.Drawing.Grid curGrid;
+                GridLine curGridLine;
+                DrawingObjectEnumerator allGridLines;
+                var dimensionXGridPoints = new ArrayList();
+                var dimensionYGridPoints = new ArrayList();
+                var tolerance = 0.05;
+
+                while (allObjects.MoveNext()) /* Iterate through all the objects in the view */
+                {
+                    if (allObjects.Current is Tekla.Structures.Drawing.Grid)  /* check if object is grid */
+                    {
+                        curGrid = allObjects.Current as Tekla.Structures.Drawing.Grid;
+                        allGridLines = curGrid.GetObjects();
+                        var point1 = new Point();
+                        var point2 = new Point();
+                        var pointForDim = new Point();
+                        while (allGridLines.MoveNext())
+                        {
+                            if (allGridLines.Current is TDWG.GridLine)  /* Iterate through all the grid lines of the grid */
+                            {
+                                curGridLine = allGridLines.Current as TDWG.GridLine;
+                                point1 = curGridLine.EndLabel.GridPoint;
+                                point2 = curGridLine.StartLabel.GridPoint;
+                                
+                                if (point1.X - point2.X < tolerance)      // decide which points to take for which dimension
+                                {
+                                    pointForDim.X = point1.X;
+                                }
+                                if (point1.Y - point2.Y < tolerance)
+                                {
+                                    pointForDim.Y = point1.Y;
+                                }
+
+                            }
+                        }
+                        if (pointForDim.X == 0.0)
+                        {
+                            pointForDim.X = (point1.X + point2.X) / 2;
+                        }
+                        if (pointForDim.Y == 0.0)
+                        {
+                            pointForDim.Y = (point1.Y + point2.Y) / 2;
+                        }
+                        dimensionXGridPoints.Add(pointForDim);
+                        dimensionYGridPoints.Add(pointForDim);
+                    }
+                }
+                
+                tBoltGroup.Select();
+                tView.Select();
+
+                //Get transformation matrix
+                var transGlobal = new Model().GetWorkPlaneHandler().GetCurrentTransformationPlane().TransformationMatrixToGlobal;
+                var transDisplayToView = MatrixFactory.ByCoordinateSystems(tView.DisplayCoordinateSystem, tView.ViewCoordinateSystem);
+
+                //Add bolt positions
+                var dimensionPoints = new ArrayList();
+                dimensionPoints.AddRange(tBoltGroup.BoltPositions);
+
+                //Create two new dimension lists
+                ArrayList dimPointsX = new ArrayList();
+                ArrayList dimPointsY = new ArrayList();
+                dimPointsX.AddRange(dimensionPoints);
+                dimPointsY.AddRange(dimensionPoints);
+
+                dimPointsX.AddRange(dimensionXGridPoints);
+                dimPointsY.AddRange(dimensionYGridPoints);
+
+                //Set direction vectors
+                Vector dimVector = new Vector(0, 1, 0);
+                Vector perpVector = dimVector.Cross(new Vector(0, 0, 1));
+
+                StraightDimensionSetHandler newDimSet = new Tekla.Structures.Drawing.StraightDimensionSetHandler();
+                TDWG.StraightDimensionSet.StraightDimensionSetAttributes sdsa = new TDWG.StraightDimensionSet.StraightDimensionSetAttributes((TDWG.ModelObject)null);
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                sdsa.DimensionType = DimensionSetBaseAttributes.DimensionTypes.Relative;                                            //////////////////////////////////  Dimensioning to grid lines dimension type /////////////////////////////////////////////////////
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                newDimSet.CreateDimensionSet(tView, ConvertArrayListToPointList(dimPointsX), dimVector, distancePast, sdsa);
+                newDimSet.CreateDimensionSet(tView, ConvertArrayListToPointList(dimPointsY), perpVector, distancePast, sdsa);
+                
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message + Environment.NewLine + ex.StackTrace);
+            }
+            finally
+            {
+                new Model().GetWorkPlaneHandler().SetCurrentTransformationPlane(originalPlane);
+            }
+                 
+        }
         private static void CreateBoltDimensionToPlate(Tekla.Structures.Drawing.View tView, Tekla.Structures.Model.ContourPlate tPlate,
             Tekla.Structures.Model.BoltGroup tBoltGroup)
         {
